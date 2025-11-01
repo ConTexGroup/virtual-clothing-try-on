@@ -163,6 +163,13 @@ const App: React.FC = () => {
       setCurrentPoseIndex(0); // Reset pose to default when removing a layer
     }
   };
+
+  const handleClearOutfit = () => {
+    if (currentOutfitIndex > 0) {
+      setCurrentOutfitIndex(0);
+      setCurrentPoseIndex(0); // Also reset pose to default
+    }
+  };
   
   const handlePoseSelect = useCallback(async (newIndex: number) => {
     if (isLoading || outfitHistory.length === 0 || newIndex === currentPoseIndex) return;
@@ -276,6 +283,7 @@ const App: React.FC = () => {
                     <OutfitStack 
                       outfitHistory={activeOutfitLayers}
                       onRemoveLastGarment={handleRemoveLastGarment}
+                      onClearOutfit={handleClearOutfit}
                     />
                     <WardrobePanel
                       onGarmentSelect={handleGarmentSelect}
