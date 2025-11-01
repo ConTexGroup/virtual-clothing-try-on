@@ -1,6 +1,6 @@
 {
-  "name": "KIYAFET GİYDİRME ",
-  "description": "Upload a photo of yourself and an outfit to see how it looks on you, powered by Nano Banana.",
+  "name": "Sanal Mağaza",
+  "description": "Kendi fotoğrafınızı ve bir kıyafet fotoğrafı yükleyerek üzerinizde nasıl durduğunu görün.",
   "requestFramePermissions": [],
   "prompt": ""
 }
