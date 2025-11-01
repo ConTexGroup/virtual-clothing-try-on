@@ -5,11 +5,11 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloudIcon, CameraIcon } from './icons';
-import { Compare } from './ui/compare';
-import { generateModelImage } from '../services/geminiService';
-import Spinner from './Spinner';
-import { getFriendlyErrorMessage } from '../lib/utils';
+import { UploadCloudIcon, CameraIcon } from './icons.tsx';
+import { Compare } from './ui/compare.tsx';
+import { generateModelImage } from '../services/geminiService.ts';
+import Spinner from './Spinner.tsx';
+import { getFriendlyErrorMessage } from '../lib/utils.ts';
 
 interface StartScreenProps {
   onModelFinalized: (modelUrl: string) => void;
