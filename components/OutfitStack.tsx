@@ -91,7 +91,6 @@ const OutfitStack: React.FC<OutfitStackProps> = ({ outfitHistory, onRemoveLastGa
                 custom={index}
                 variants={cardVariants}
                 initial="initial"
-                animate="stacked"
                 exit="exit"
                 className="absolute top-0 left-0 right-0 flex items-center justify-between bg-white/70 backdrop-blur-md p-2 rounded-lg border border-gray-200/80 shadow-md"
                 style={{ originX: 0.5, top: 16 }} // Add top padding offset
