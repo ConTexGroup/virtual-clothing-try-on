@@ -266,14 +266,18 @@ const App: React.FC = () => {
                 className={`absolute md:relative md:flex-shrink-0 bottom-0 right-0 h-auto md:h-full w-full md:w-1/3 md:max-w-sm bg-white/80 backdrop-blur-md flex flex-col border-t md:border-t-0 md:border-l border-gray-200/60 transition-transform duration-500 ease-in-out ${isSheetCollapsed ? 'translate-y-[calc(100%-4.5rem)]' : 'translate-y-0'} md:translate-y-0`}
                 style={{ transitionProperty: 'transform' }}
               >
-                  <button 
-                    onClick={() => setIsSheetCollapsed(!isSheetCollapsed)} 
-                    className="md:hidden w-full h-8 flex items-center justify-center bg-gray-100/50"
-                    aria-label={isSheetCollapsed ? 'Expand panel' : 'Collapse panel'}
+                  <div
+                    onClick={() => setIsSheetCollapsed(!isSheetCollapsed)}
+                    className="md:hidden w-full h-[4.5rem] flex-shrink-0 flex items-center justify-between px-6 bg-gray-50/70 border-b border-gray-200/80 cursor-pointer"
+                    aria-expanded={!isSheetCollapsed}
+                    aria-controls="wardrobe-content"
                   >
+                    <h2 className="text-lg font-serif tracking-wide text-gray-800">
+                      Outfit & Wardrobe
+                    </h2>
                     {isSheetCollapsed ? <ChevronUpIcon className="w-6 h-6 text-gray-500" /> : <ChevronDownIcon className="w-6 h-6 text-gray-500" />}
-                  </button>
-                  <div className="p-4 md:p-6 pb-20 overflow-y-auto flex-grow flex flex-col gap-8">
+                  </div>
+                  <div id="wardrobe-content" className="p-4 md:p-6 pb-20 overflow-y-auto flex-grow flex flex-col gap-8">
                     {error && (
                       <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md" role="alert">
                         <p className="font-bold">Error</p>
