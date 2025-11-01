@@ -5,23 +5,30 @@
 
 import React, { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloudIcon, CameraIcon } from './icons.tsx';
+import { UploadCloudIcon } from './icons.tsx';
 import { Compare } from './ui/compare.tsx';
 import { generateModelImage } from '../services/geminiService.ts';
 import Spinner from './Spinner.tsx';
 import { getFriendlyErrorMessage } from '../lib/utils.ts';
+import { useAppContext } from '../lib/context.tsx';
 
 interface StartScreenProps {
   onModelFinalized: (modelUrl: string) => void;
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
+  const { apiKey } = useAppContext();
+  const [view, setView] = useState<'uploader' | 'comparison'>('uploader');
   const [userImageUrl, setUserImageUrl] = useState<string | null>(null);
   const [generatedModelUrl, setGeneratedModelUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleFileSelect = useCallback(async (file: File) => {
+    if (!apiKey) {
+      setError('API Key is not set. This is unexpected.');
+      return;
+    }
     if (!file.type.startsWith('image/')) {
         setError('Please select an image file.');
         return;
@@ -30,22 +37,24 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
         const dataUrl = e.target?.result as string;
+        setView('comparison');
         setUserImageUrl(dataUrl);
         setIsGenerating(true);
         setGeneratedModelUrl(null);
         setError(null);
         try {
-            const result = await generateModelImage(file);
+            const result = await generateModelImage(file, apiKey);
             setGeneratedModelUrl(result);
         } catch (err) {
             setError(getFriendlyErrorMessage(err, 'Failed to create model'));
             setUserImageUrl(null);
+            setView('uploader'); // Go back to uploader on error
         } finally {
             setIsGenerating(false);
         }
     };
     reader.readAsDataURL(file);
-  }, []);
+  }, [apiKey]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -58,6 +67,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
     setGeneratedModelUrl(null);
     setIsGenerating(false);
     setError(null);
+    setView('uploader');
   };
 
   const screenVariants = {
@@ -68,7 +78,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
 
   return (
     <AnimatePresence mode="wait">
-      {!userImageUrl ? (
+      {view === 'uploader' && (
         <motion.div
           key="uploader"
           className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center text-center py-12"
@@ -82,11 +92,11 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
             Create Your Model for Any Look.
           </h1>
           <p className="mt-4 text-lg text-gray-600 max-w-2xl">
-            Ever wondered how an outfit would look on you? Stop guessing. Upload a photo and see for yourself. Our AI creates your personal model, ready to try on anything.
+            Ever wondered how an outfit would look on you? Stop guessing. Upload a photo, and see for yourself. Our AI creates your personal model, ready to try on anything.
           </p>
           
-          <div className="mt-8 w-full max-w-xs">
-            <label htmlFor="image-upload-start" className="w-full relative flex items-center justify-center px-8 py-3 text-base font-semibold text-white bg-gray-900 rounded-md cursor-pointer group hover:bg-gray-700 transition-colors">
+          <div className="mt-8 w-full max-w-xs flex flex-col sm:flex-row gap-4">
+            <label htmlFor="image-upload-start" className="w-full relative flex items-center justify-center px-6 py-3 text-base font-semibold text-white bg-gray-900 rounded-md cursor-pointer group hover:bg-gray-700 transition-colors">
               <UploadCloudIcon className="w-5 h-5 mr-3" />
               Upload Photo
             </label>
@@ -94,7 +104,9 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
           </div>
           {error && <p className="text-red-500 mt-4">{error}</p>}
         </motion.div>
-      ) : (
+      )}
+
+      {view === 'comparison' && userImageUrl && (
         <motion.div
           key="comparison"
           className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center"
@@ -135,7 +147,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
                 Start Styling
             </button>
             <button onClick={reset} className="w-full sm:w-auto text-base font-semibold text-gray-700">
-                Or upload another photo
+                Or use a different photo
             </button>
           </div>
         </motion.div>
