@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 import React from 'react';
-import { RotateCcwIcon } from './icons';
-import Spinner from './Spinner';
+import { RotateCcwIcon } from './icons.tsx';
+import Spinner from './Spinner.tsx';
 import { AnimatePresence, motion } from 'framer-motion';
 
 interface CanvasProps {
