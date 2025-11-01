@@ -15,6 +15,7 @@ import { ChevronDownIcon, ChevronUpIcon } from './components/icons.tsx';
 import { defaultWardrobe } from './wardrobe.ts';
 import { getFriendlyErrorMessage } from './lib/utils.ts';
 import Spinner from './components/Spinner.tsx';
+import Layout from './components/Layout.tsx';
 
 const POSE_INSTRUCTIONS = [
   "Full frontal view, hands on hips",
@@ -32,16 +33,13 @@ const useMediaQuery = (query: string): boolean => {
     const mediaQueryList = window.matchMedia(query);
     const listener = (event: MediaQueryListEvent) => setMatches(event.matches);
 
-    // DEPRECATED: mediaQueryList.addListener(listener);
     mediaQueryList.addEventListener('change', listener);
     
-    // Check again on mount in case it changed between initial state and effect runs
     if (mediaQueryList.matches !== matches) {
       setMatches(mediaQueryList.matches);
     }
 
     return () => {
-      // DEPRECATED: mediaQueryList.removeListener(listener);
       mediaQueryList.removeEventListener('change', listener);
     };
   }, [query, matches]);
@@ -73,8 +71,6 @@ const App: React.FC = () => {
     if (!currentLayer) return modelImageUrl;
 
     const poseInstruction = POSE_INSTRUCTIONS[currentPoseIndex];
-    // Return the image for the current pose, or fallback to the first available image for the current layer.
-    // This ensures an image is shown even while a new pose is generating.
     return currentLayer.poseImages[poseInstruction] ?? Object.values(currentLayer.poseImages)[0];
   }, [outfitHistory, currentOutfitIndex, currentPoseIndex, modelImageUrl]);
 
@@ -108,11 +104,10 @@ const App: React.FC = () => {
   const handleGarmentSelect = useCallback(async (garmentFile: File, garmentInfo: WardrobeItem) => {
     if (!displayImageUrl || isLoading) return;
 
-    // Caching: Check if we are re-applying a previously generated layer
     const nextLayer = outfitHistory[currentOutfitIndex + 1];
     if (nextLayer && nextLayer.garment?.id === garmentInfo.id) {
         setCurrentOutfitIndex(prev => prev + 1);
-        setCurrentPoseIndex(0); // Reset pose when changing layer
+        setCurrentPoseIndex(0); 
         return;
     }
 
@@ -130,13 +125,11 @@ const App: React.FC = () => {
       };
 
       setOutfitHistory(prevHistory => {
-        // Cut the history at the current point before adding the new layer
         const newHistory = prevHistory.slice(0, currentOutfitIndex + 1);
         return [...newHistory, newLayer];
       });
       setCurrentOutfitIndex(prev => prev + 1);
       
-      // Add to personal wardrobe if it's not already there
       setWardrobe(prev => {
         if (prev.find(item => item.id === garmentInfo.id)) {
             return prev;
@@ -154,21 +147,21 @@ const App: React.FC = () => {
   const handleRemoveLastGarment = () => {
     if (currentOutfitIndex > 0) {
       setCurrentOutfitIndex(prevIndex => prevIndex - 1);
-      setCurrentPoseIndex(0); // Reset pose to default when removing a layer
+      setCurrentPoseIndex(0); 
     }
   };
 
   const handleClearOutfit = () => {
     if (currentOutfitIndex > 0) {
       setCurrentOutfitIndex(0);
-      setCurrentPoseIndex(0); // Also reset pose to default
+      setCurrentPoseIndex(0);
     }
   };
 
   const handleSelectHistoryItem = (index: number) => {
     if (isLoading || index === currentOutfitIndex) return;
     setCurrentOutfitIndex(index);
-    setCurrentPoseIndex(0); // Reset pose for consistency when navigating history
+    setCurrentPoseIndex(0); 
   };
   
   const handlePoseSelect = useCallback(async (newIndex: number) => {
@@ -177,23 +170,19 @@ const App: React.FC = () => {
     const poseInstruction = POSE_INSTRUCTIONS[newIndex];
     const currentLayer = outfitHistory[currentOutfitIndex];
 
-    // If pose already exists, just update the index to show it.
     if (currentLayer.poseImages[poseInstruction]) {
       setCurrentPoseIndex(newIndex);
       return;
     }
 
-    // Pose doesn't exist, so generate it.
-    // Use an existing image from the current layer as the base.
     const baseImageForPoseChange = Object.values(currentLayer.poseImages)[0];
-    if (!baseImageForPoseChange) return; // Should not happen
+    if (!baseImageForPoseChange) return;
 
     setError(null);
     setIsLoading(true);
     setLoadingMessage(`Changing pose...`);
     
     const prevPoseIndex = currentPoseIndex;
-    // Optimistically update the pose index so the pose name changes in the UI
     setCurrentPoseIndex(newIndex);
 
     try {
@@ -205,11 +194,7 @@ const App: React.FC = () => {
         return newHistory;
       });
     } catch (err) {
-      // FIX: The error at this line was that an 'unknown' type was being passed to a function
-      // that was expecting a 'string'. We now ensure the error is converted to a string before
-      // being passed to the error handler.
       setError(getFriendlyErrorMessage(err, 'Failed to change pose'));
-      // Revert pose index on failure
       setCurrentPoseIndex(prevPoseIndex);
     } finally {
       setIsLoading(false);
@@ -224,12 +209,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="font-sans">
+    <Layout>
       <AnimatePresence mode="wait">
         {!modelImageUrl ? (
           <motion.div
             key="start-screen"
-            className="w-screen min-h-screen flex items-start sm:items-center justify-center bg-gray-50 p-4 pb-20"
+            className="w-full flex-grow flex items-start sm:items-center justify-center bg-gray-50 p-4 pb-20"
             variants={viewVariants}
             initial="initial"
             animate="animate"
@@ -241,7 +226,7 @@ const App: React.FC = () => {
         ) : (
           <motion.div
             key="main-app"
-            className="relative flex flex-col h-screen bg-white overflow-hidden"
+            className="flex-grow flex flex-col bg-white overflow-hidden"
             variants={viewVariants}
             initial="initial"
             animate="animate"
@@ -318,7 +303,7 @@ const App: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </Layout>
   );
 };
 
