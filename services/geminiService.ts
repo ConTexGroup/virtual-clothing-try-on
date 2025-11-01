@@ -5,15 +5,8 @@
 
 import { GoogleGenAI, GenerateContentResponse, Modality } from "@google/genai";
 
-// Creates an AI client instance with the provided API key.
-const getAiClient = (apiKey: string) => {
-    if (!apiKey) {
-        // This is a developer-facing error, not for the user.
-        // The UI should prevent calls with an empty key.
-        throw new Error("API Key is missing.");
-    }
-    return new GoogleGenAI({ apiKey });
-};
+// The AI client is initialized once with the API key from environment variables.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
 const fileToPart = async (file: File) => {
     const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -67,8 +60,7 @@ const handleApiResponse = (response: GenerateContentResponse): string => {
 
 const model = 'gemini-2.5-flash-image';
 
-export const generateModelImage = async (userImage: File, apiKey: string): Promise<string> => {
-    const ai = getAiClient(apiKey);
+export const generateModelImage = async (userImage: File): Promise<string> => {
     const userImagePart = await fileToPart(userImage);
     const prompt = "You are an expert fashion photographer AI. Transform the person in this image into a full-body fashion model photo suitable for an e-commerce website. The background must be a clean, neutral studio backdrop (light gray, #f0f0f0). The person should have a neutral, professional model expression. Preserve the person's identity, unique features, and body type, but place them in a standard, relaxed standing model pose. The final image must be photorealistic. Return ONLY the final image.";
     const response = await ai.models.generateContent({
@@ -81,8 +73,7 @@ export const generateModelImage = async (userImage: File, apiKey: string): Promi
     return handleApiResponse(response);
 };
 
-export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentImage: File, apiKey: string): Promise<string> => {
-    const ai = getAiClient(apiKey);
+export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentImage: File): Promise<string> => {
     const modelImagePart = dataUrlToPart(modelImageUrl);
     const garmentImagePart = await fileToPart(garmentImage);
     const prompt = `You are an expert virtual try-on AI. You will be given a 'model image' and a 'garment image'. Your task is to create a new photorealistic image where the person from the 'model image' is wearing the clothing from the 'garment image'.
@@ -103,8 +94,7 @@ export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentIm
     return handleApiResponse(response);
 };
 
-export const generatePoseVariation = async (tryOnImageUrl: string, poseInstruction: string, apiKey: string): Promise<string> => {
-    const ai = getAiClient(apiKey);
+export const generatePoseVariation = async (tryOnImageUrl: string, poseInstruction: string): Promise<string> => {
     const tryOnImagePart = dataUrlToPart(tryOnImageUrl);
     const prompt = `You are an expert fashion photographer AI. Take this image and regenerate it from a different perspective. The person, clothing, and background style must remain identical. The new perspective should be: "${poseInstruction}". Return ONLY the final image.`;
     const response = await ai.models.generateContent({
