@@ -233,7 +233,7 @@ const App: React.FC = () => {
             exit="exit"
             transition={{ duration: 0.5, ease: 'easeInOut' }}
           >
-            <main className="flex-grow relative flex flex-col md:flex-row overflow-hidden">
+            <div className="flex-grow relative flex flex-col md:flex-row overflow-hidden">
               <div className="w-full h-full flex-grow flex items-center justify-center bg-white pb-16 relative">
                 <Canvas 
                   displayImageUrl={displayImageUrl}
@@ -284,7 +284,7 @@ const App: React.FC = () => {
                     />
                   </div>
               </aside>
-            </main>
+            </div>
             <AnimatePresence>
               {isLoading && isMobile && (
                 <motion.div
