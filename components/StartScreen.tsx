@@ -10,14 +10,12 @@ import { Compare } from './ui/compare.tsx';
 import { generateModelImage } from '../services/geminiService.ts';
 import Spinner from './Spinner.tsx';
 import { getFriendlyErrorMessage } from '../lib/utils.ts';
-import { useAppContext } from '../lib/context.tsx';
 
 interface StartScreenProps {
   onModelFinalized: (modelUrl: string) => void;
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
-  const { apiKey } = useAppContext();
   const [view, setView] = useState<'uploader' | 'comparison'>('uploader');
   const [userImageUrl, setUserImageUrl] = useState<string | null>(null);
   const [generatedModelUrl, setGeneratedModelUrl] = useState<string | null>(null);
@@ -25,10 +23,6 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
   const [error, setError] = useState<string | null>(null);
 
   const handleFileSelect = useCallback(async (file: File) => {
-    if (!apiKey) {
-      setError('API Key is not set. This is unexpected.');
-      return;
-    }
     if (!file.type.startsWith('image/')) {
         setError('Please select an image file.');
         return;
@@ -43,7 +37,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
         setGeneratedModelUrl(null);
         setError(null);
         try {
-            const result = await generateModelImage(file, apiKey);
+            const result = await generateModelImage(file);
             setGeneratedModelUrl(result);
         } catch (err) {
             setError(getFriendlyErrorMessage(err, 'Failed to create model'));
@@ -54,7 +48,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
         }
     };
     reader.readAsDataURL(file);
-  }, [apiKey]);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
