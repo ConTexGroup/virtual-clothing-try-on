@@ -5,17 +5,12 @@
 
 import { GoogleGenAI, GenerateContentResponse, Modality } from "@google/genai";
 
-// Helper function to initialize the AI client on-demand.
-// This prevents the app from crashing on load if the API key is missing
-// and instead shows a catchable error in the UI.
-const getAiClient = () => {
-    // Safely access the API key to prevent 'process is not defined' error in some environments.
-    const apiKey = (typeof process !== 'undefined' && process.env) ? process.env.API_KEY : undefined;
-
-    // The API key is expected to be set as an environment variable.
-    // If it's not available, we throw an error that can be caught by the UI components.
+// Creates an AI client instance with the provided API key.
+const getAiClient = (apiKey: string) => {
     if (!apiKey) {
-        throw new Error("API Key not found. Please ensure the API_KEY environment variable is set.");
+        // This is a developer-facing error, not for the user.
+        // The UI should prevent calls with an empty key.
+        throw new Error("API Key is missing.");
     }
     return new GoogleGenAI({ apiKey });
 };
@@ -72,23 +67,22 @@ const handleApiResponse = (response: GenerateContentResponse): string => {
 
 const model = 'gemini-2.5-flash-image';
 
-export const generateModelImage = async (userImage: File): Promise<string> => {
-    const ai = getAiClient();
+export const generateModelImage = async (userImage: File, apiKey: string): Promise<string> => {
+    const ai = getAiClient(apiKey);
     const userImagePart = await fileToPart(userImage);
     const prompt = "You are an expert fashion photographer AI. Transform the person in this image into a full-body fashion model photo suitable for an e-commerce website. The background must be a clean, neutral studio backdrop (light gray, #f0f0f0). The person should have a neutral, professional model expression. Preserve the person's identity, unique features, and body type, but place them in a standard, relaxed standing model pose. The final image must be photorealistic. Return ONLY the final image.";
     const response = await ai.models.generateContent({
         model,
         contents: { parts: [userImagePart, { text: prompt }] },
         config: {
-            // FIX: Per coding guidelines, responseModalities must be an array with a single Modality.IMAGE element.
             responseModalities: [Modality.IMAGE],
         },
     });
     return handleApiResponse(response);
 };
 
-export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentImage: File): Promise<string> => {
-    const ai = getAiClient();
+export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentImage: File, apiKey: string): Promise<string> => {
+    const ai = getAiClient(apiKey);
     const modelImagePart = dataUrlToPart(modelImageUrl);
     const garmentImagePart = await fileToPart(garmentImage);
     const prompt = `You are an expert virtual try-on AI. You will be given a 'model image' and a 'garment image'. Your task is to create a new photorealistic image where the person from the 'model image' is wearing the clothing from the 'garment image'.
@@ -103,22 +97,20 @@ export const generateVirtualTryOnImage = async (modelImageUrl: string, garmentIm
         model,
         contents: { parts: [modelImagePart, garmentImagePart, { text: prompt }] },
         config: {
-            // FIX: Per coding guidelines, responseModalities must be an array with a single Modality.IMAGE element.
             responseModalities: [Modality.IMAGE],
         },
     });
     return handleApiResponse(response);
 };
 
-export const generatePoseVariation = async (tryOnImageUrl: string, poseInstruction: string): Promise<string> => {
-    const ai = getAiClient();
+export const generatePoseVariation = async (tryOnImageUrl: string, poseInstruction: string, apiKey: string): Promise<string> => {
+    const ai = getAiClient(apiKey);
     const tryOnImagePart = dataUrlToPart(tryOnImageUrl);
     const prompt = `You are an expert fashion photographer AI. Take this image and regenerate it from a different perspective. The person, clothing, and background style must remain identical. The new perspective should be: "${poseInstruction}". Return ONLY the final image.`;
     const response = await ai.models.generateContent({
         model,
         contents: { parts: [tryOnImagePart, { text: prompt }] },
         config: {
-            // FIX: Per coding guidelines, responseModalities must be an array with a single Modality.IMAGE element.
             responseModalities: [Modality.IMAGE],
         },
     });
