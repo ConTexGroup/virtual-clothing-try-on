@@ -16,6 +16,8 @@ import { defaultWardrobe } from './wardrobe.ts';
 import { getFriendlyErrorMessage } from './lib/utils.ts';
 import Spinner from './components/Spinner.tsx';
 import Layout from './components/Layout.tsx';
+import { useAppContext } from './lib/context.tsx';
+import ApiKeyModal from './components/ApiKeyModal.tsx';
 
 const POSE_INSTRUCTIONS = [
   "Full frontal view, hands on hips",
@@ -49,6 +51,7 @@ const useMediaQuery = (query: string): boolean => {
 
 
 const App: React.FC = () => {
+  const { apiKey } = useAppContext();
   const [modelImageUrl, setModelImageUrl] = useState<string | null>(null);
   const [outfitHistory, setOutfitHistory] = useState<OutfitLayer[]>([]);
   const [currentOutfitIndex, setCurrentOutfitIndex] = useState(0);
@@ -102,7 +105,7 @@ const App: React.FC = () => {
   };
 
   const handleGarmentSelect = useCallback(async (garmentFile: File, garmentInfo: WardrobeItem) => {
-    if (!displayImageUrl || isLoading) return;
+    if (!displayImageUrl || isLoading || !apiKey) return;
 
     const nextLayer = outfitHistory[currentOutfitIndex + 1];
     if (nextLayer && nextLayer.garment?.id === garmentInfo.id) {
@@ -116,7 +119,7 @@ const App: React.FC = () => {
     setLoadingMessage(`Adding ${garmentInfo.name}...`);
 
     try {
-      const newImageUrl = await generateVirtualTryOnImage(displayImageUrl, garmentFile);
+      const newImageUrl = await generateVirtualTryOnImage(displayImageUrl, garmentFile, apiKey);
       const currentPoseInstruction = POSE_INSTRUCTIONS[currentPoseIndex];
       
       const newLayer: OutfitLayer = { 
@@ -142,7 +145,7 @@ const App: React.FC = () => {
       setIsLoading(false);
       setLoadingMessage('');
     }
-  }, [displayImageUrl, isLoading, currentPoseIndex, outfitHistory, currentOutfitIndex]);
+  }, [displayImageUrl, isLoading, currentPoseIndex, outfitHistory, currentOutfitIndex, apiKey]);
 
   const handleRemoveLastGarment = () => {
     if (currentOutfitIndex > 0) {
@@ -165,7 +168,7 @@ const App: React.FC = () => {
   };
   
   const handlePoseSelect = useCallback(async (newIndex: number) => {
-    if (isLoading || outfitHistory.length === 0 || newIndex === currentPoseIndex) return;
+    if (isLoading || outfitHistory.length === 0 || newIndex === currentPoseIndex || !apiKey) return;
     
     const poseInstruction = POSE_INSTRUCTIONS[newIndex];
     const currentLayer = outfitHistory[currentOutfitIndex];
@@ -186,7 +189,7 @@ const App: React.FC = () => {
     setCurrentPoseIndex(newIndex);
 
     try {
-      const newImageUrl = await generatePoseVariation(baseImageForPoseChange, poseInstruction);
+      const newImageUrl = await generatePoseVariation(baseImageForPoseChange, poseInstruction, apiKey);
       setOutfitHistory(prevHistory => {
         const newHistory = [...prevHistory];
         const updatedLayer = newHistory[currentOutfitIndex];
@@ -200,13 +203,21 @@ const App: React.FC = () => {
       setIsLoading(false);
       setLoadingMessage('');
     }
-  }, [currentPoseIndex, outfitHistory, isLoading, currentOutfitIndex]);
+  }, [currentPoseIndex, outfitHistory, isLoading, currentOutfitIndex, apiKey]);
 
   const viewVariants = {
     initial: { opacity: 0, y: 15 },
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -15 },
   };
+  
+  if (!apiKey) {
+    return (
+      <Layout>
+        <ApiKeyModal />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
