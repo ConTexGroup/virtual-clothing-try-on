@@ -13,7 +13,6 @@ import { generateVirtualTryOnImage, generatePoseVariation } from './services/gem
 import { OutfitLayer, WardrobeItem } from './types';
 import { ChevronDownIcon, ChevronUpIcon } from './components/icons';
 import { defaultWardrobe } from './wardrobe';
-import Footer from './components/Footer';
 import { getFriendlyErrorMessage } from './lib/utils';
 import Spinner from './components/Spinner';
 
@@ -319,7 +318,6 @@ const App: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <Footer isOnDressingScreen={!!modelImageUrl} />
     </div>
   );
 };
