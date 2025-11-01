@@ -127,15 +127,15 @@ const StartScreen: React.FC<StartScreenProps> = ({ onModelFinalized }) => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex flex-col items-center">
-                <img src="https://storage.googleapis.com/gemini-95-icons/tip-1.png" alt="A clear, full-body shot of a person" className="rounded-lg mb-2 w-full max-w-[200px] aspect-[2/3] object-cover border border-gray-200 bg-gray-100"/>
+                <img src="https://storage.googleapis.com/app-images-2/tip-1.png" alt="A clear, full-body shot of a person" className="rounded-lg mb-2 w-full max-w-[200px] aspect-[2/3] object-cover border border-gray-200 bg-gray-100"/>
                 <p className="text-sm font-medium text-gray-700">Clear, full-body shot</p>
               </div>
               <div className="flex flex-col items-center">
-                <img src="https://storage.googleapis.com/gemini-95-icons/tip-2.png" alt="A well-lit portrait of a person" className="rounded-lg mb-2 w-full max-w-[200px] aspect-[2/3] object-cover border border-gray-200 bg-gray-100"/>
+                <img src="https://storage.googleapis.com/app-images-2/tip-2.png" alt="A well-lit portrait of a person" className="rounded-lg mb-2 w-full max-w-[200px] aspect-[2/3] object-cover border border-gray-200 bg-gray-100"/>
                 <p className="text-sm font-medium text-gray-700">Well-lit portrait</p>
               </div>
               <div className="flex flex-col items-center">
-                <img src="https://storage.googleapis.com/gemini-95-icons/tip-3.png" alt="A person against a simple background" className="rounded-lg mb-2 w-full max-w-[200px] aspect-[2/3] object-cover border border-gray-200 bg-gray-100"/>
+                <img src="https://storage.googleapis.com/app-images-2/tip-3.png" alt="A person against a simple background" className="rounded-lg mb-2 w-full max-w-[200px] aspect-[2/3] object-cover border border-gray-200 bg-gray-100"/>
                 <p className="text-sm font-medium text-gray-700">Simple background</p>
               </div>
             </div>
