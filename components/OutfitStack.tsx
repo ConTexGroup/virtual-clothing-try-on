@@ -11,6 +11,8 @@ import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 interface OutfitStackProps {
   outfitHistory: OutfitLayer[];
+  currentOutfitIndex: number;
+  onSelectHistoryItem: (index: number) => void;
   onRemoveLastGarment: () => void;
   onClearOutfit: () => void;
 }
@@ -50,7 +52,7 @@ const cardVariants: Variants = {
 };
 
 
-const OutfitStack: React.FC<OutfitStackProps> = ({ outfitHistory, onRemoveLastGarment, onClearOutfit }) => {
+const OutfitStack: React.FC<OutfitStackProps> = ({ outfitHistory, onRemoveLastGarment, onClearOutfit, currentOutfitIndex, onSelectHistoryItem }) => {
   const hasGarments = outfitHistory.length > 1;
   // Reverse the history for visual stacking (item 1 on top)
   const reversedHistory = [...outfitHistory].slice(0).reverse();
@@ -83,6 +85,8 @@ const OutfitStack: React.FC<OutfitStackProps> = ({ outfitHistory, onRemoveLastGa
             // Original index is needed for the layer number
             const originalIndex = outfitHistory.length - 1 - index;
             const isBaseLayer = originalIndex === 0;
+            const isCurrent = originalIndex === currentOutfitIndex;
+            const isTop = originalIndex === outfitHistory.length - 1;
 
             return (
               <motion.div
@@ -92,8 +96,10 @@ const OutfitStack: React.FC<OutfitStackProps> = ({ outfitHistory, onRemoveLastGa
                 variants={cardVariants}
                 initial="initial"
                 exit="exit"
-                className="absolute top-0 left-0 right-0 flex items-center justify-between bg-white/70 backdrop-blur-md p-2 rounded-lg border border-gray-200/80 shadow-md"
+                onClick={() => onSelectHistoryItem(originalIndex)}
+                className={`absolute top-0 left-0 right-0 flex items-center justify-between bg-white/70 backdrop-blur-md p-2 rounded-lg shadow-md border-2 transition-colors duration-200 ${isCurrent ? 'border-blue-500' : 'border-gray-200/80'} ${!isCurrent ? 'cursor-pointer' : ''}`}
                 style={{ originX: 0.5, top: 16 }} // Add top padding offset
+                title={!isCurrent ? `Go to layer ${originalIndex + 1}` : ''}
               >
                 <div className="flex items-center overflow-hidden flex-1">
                     <span className="flex-shrink-0 flex items-center justify-center w-8 h-8 mr-3 text-sm font-bold text-gray-600 bg-gray-200 rounded-full">
@@ -110,9 +116,12 @@ const OutfitStack: React.FC<OutfitStackProps> = ({ outfitHistory, onRemoveLastGa
                       {layer.garment ? layer.garment.name : 'Base Model'}
                     </span>
                 </div>
-                {!isBaseLayer && originalIndex === outfitHistory.length - 1 && (
+                {!isBaseLayer && isTop && (
                    <motion.button
-                    onClick={onRemoveLastGarment}
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent card click when clicking button
+                      onRemoveLastGarment();
+                    }}
                     className="flex-shrink-0 text-gray-500 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50"
                     aria-label={`Remove ${layer.garment?.name}`}
                     whileHover={{ scale: 1.1 }}
@@ -127,7 +136,7 @@ const OutfitStack: React.FC<OutfitStackProps> = ({ outfitHistory, onRemoveLastGa
         </AnimatePresence>
       </motion.div>
 
-        {outfitHistory.length === 1 && (
+        {outfitHistory.length <= 1 && (
             <div className="text-center text-sm text-gray-500 pt-10 pb-4">Your stacked items will appear here. Select an item from the wardrobe below.</div>
         )}
     </div>
