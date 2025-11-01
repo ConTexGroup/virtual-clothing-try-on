@@ -4,8 +4,8 @@
 */
 
 import React from 'react';
-import { OutfitLayer } from '../types';
-import { Trash2Icon } from './icons';
+import { OutfitLayer } from '../types.ts';
+import { Trash2Icon } from './icons.tsx';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 
 
