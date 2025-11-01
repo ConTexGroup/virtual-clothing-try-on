@@ -62,15 +62,10 @@ const App: React.FC = () => {
   const [isSheetCollapsed, setIsSheetCollapsed] = useState(false);
   const [wardrobe, setWardrobe] = useState<WardrobeItem[]>(defaultWardrobe);
   const isMobile = useMediaQuery('(max-width: 767px)');
-
-  const activeOutfitLayers = useMemo(() => 
-    outfitHistory.slice(0, currentOutfitIndex + 1), 
-    [outfitHistory, currentOutfitIndex]
-  );
   
   const activeGarmentIds = useMemo(() => 
-    activeOutfitLayers.map(layer => layer.garment?.id).filter(Boolean) as string[], 
-    [activeOutfitLayers]
+    outfitHistory.slice(0, currentOutfitIndex + 1).map(layer => layer.garment?.id).filter(Boolean) as string[], 
+    [outfitHistory, currentOutfitIndex]
   );
   
   const displayImageUrl = useMemo(() => {
@@ -169,6 +164,12 @@ const App: React.FC = () => {
       setCurrentOutfitIndex(0);
       setCurrentPoseIndex(0); // Also reset pose to default
     }
+  };
+
+  const handleSelectHistoryItem = (index: number) => {
+    if (isLoading || index === currentOutfitIndex) return;
+    setCurrentOutfitIndex(index);
+    setCurrentPoseIndex(0); // Reset pose for consistency when navigating history
   };
   
   const handlePoseSelect = useCallback(async (newIndex: number) => {
@@ -285,7 +286,9 @@ const App: React.FC = () => {
                       </div>
                     )}
                     <OutfitStack 
-                      outfitHistory={activeOutfitLayers}
+                      outfitHistory={outfitHistory}
+                      currentOutfitIndex={currentOutfitIndex}
+                      onSelectHistoryItem={handleSelectHistoryItem}
                       onRemoveLastGarment={handleRemoveLastGarment}
                       onClearOutfit={handleClearOutfit}
                     />
